@@ -70,10 +70,17 @@ If you want GitHub to run it every day:
 4. Leave the schedule enabled.
 The workflow lives in `.github/workflows/daily.yml`.
 
-The current workflow sends the daily email to active Supabase subscribers when `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `PUBLIC_BASE_URL` are configured. Without Supabase, it falls back to `EMAIL_TO`.
+The current workflow sends the daily email to active Supabase subscribers when `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `PUBLIC_BASE_URL` are configured. It also stores sent quote history in Supabase so quote rotation stays reliable across GitHub Actions runs. Without Supabase, it falls back to `EMAIL_TO` and local `data/sent.json`.
 
 ## Supabase Setup
 Create a Supabase project and run the SQL in `supabase/schema.sql`.
+
+The schema creates:
+- `subscribers` for email signup status
+- `verification_tokens` for double opt-in links
+- `sent_quotes` for repeat prevention
+
+RLS is enabled on all tables. The app uses `SUPABASE_SERVICE_ROLE_KEY` only on the server side, so no public table policies are required for this MVP.
 
 Local and production env need:
 - `SUPABASE_URL`
@@ -200,6 +207,9 @@ DRY_RUN=false npm run start:worker
   /services
     email.ts
     openai.ts
+    sentQuotes.ts
+    subscribers.ts
+    supabase.ts
     wikipedia.ts
   /core
     selector.ts
@@ -222,5 +232,6 @@ DRY_RUN=false npm run start:worker
 
 ## Notes
 - `.env` is git-ignored. Real credentials should never be committed.
-- `data/sent.json` is git-ignored so your send history stays private.
-- Dates in `data/sent.json` use UTC `YYYY-MM-DD` format.
+- Sent quote history is stored in Supabase when Supabase env vars are configured.
+- `data/sent.json` is still git-ignored and used as a local fallback.
+- Dates use UTC `YYYY-MM-DD` format.

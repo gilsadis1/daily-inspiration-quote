@@ -1,6 +1,5 @@
 import { createHash, createHmac, randomBytes, timingSafeEqual } from "crypto";
-import { createClient } from "@supabase/supabase-js";
-import WebSocket from "ws";
+import { getSupabaseAdmin } from "./supabase";
 
 export type SubscriberStatus = "pending" | "active" | "unsubscribed";
 
@@ -16,19 +15,6 @@ function getEnv(name: string): string {
     throw new Error(`Missing environment variable: ${name}`);
   }
   return value;
-}
-
-function getSupabaseAdmin() {
-  return createClient(getEnv("SUPABASE_URL"), getEnv("SUPABASE_SERVICE_ROLE_KEY"), {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false
-    },
-    realtime: {
-      // Supabase expects a browser-like WebSocket constructor; ws is the Node 20 equivalent.
-      transport: WebSocket as never
-    }
-  });
 }
 
 export function normalizeEmail(email: string): string {

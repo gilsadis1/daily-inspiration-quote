@@ -7,6 +7,8 @@ import { fetchWikipediaSummary, resolveWikipediaUrl } from "./services/wikipedia
 import { generateLocalizedContent } from "./services/openai";
 import { sendEmailMessage } from "./services/email";
 import { listActiveSubscribers } from "./services/subscribers";
+import { hasSupabaseConfig } from "./services/supabase";
+import { appendSentQuote, readSentQuotes } from "./services/sentQuotes";
 
 function parseBool(value: string | undefined): boolean {
   if (!value) return false;
@@ -55,7 +57,7 @@ function defaultSubject(language: string): string {
 }
 
 function hasSubscriberDatabase(): boolean {
-  return Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.PUBLIC_BASE_URL);
+  return Boolean(hasSupabaseConfig() && process.env.PUBLIC_BASE_URL);
 }
 
 function withUnsubscribeLink(message: string, token: string): string {
@@ -74,7 +76,15 @@ async function run(): Promise<void> {
   const subject = (process.env.EMAIL_SUBJECT || "").trim() || defaultSubject(contentLanguage);
 
   console.log("Loading sent log...");
-  const sentLog = await readSentLog();
+  let sentLog = await readSentLog();
+  if (hasSupabaseConfig()) {
+    try {
+      sentLog = await readSentQuotes();
+      console.log(`Loaded ${sentLog.length} sent entries from Supabase.`);
+    } catch (err) {
+      console.warn("Could not load sent entries from Supabase. Falling back to data/sent.json.", err);
+    }
+  }
 
   const forced = findForcedQuote();
   console.log("Selecting quote...");
@@ -138,7 +148,15 @@ async function run(): Promise<void> {
   }
 
   const today = new Date().toISOString().slice(0, 10);
-  await appendSentLog({ date: today, quoteId: selection.quote.id });
+  const sentEntry = { date: today, quoteId: selection.quote.id };
+  await appendSentLog(sentEntry);
+  if (hasSupabaseConfig()) {
+    try {
+      await appendSentQuote(sentEntry);
+    } catch (err) {
+      console.warn("Could not write sent entry to Supabase. Local data/sent.json was still updated.", err);
+    }
+  }
 
   console.log("Done.");
 }
