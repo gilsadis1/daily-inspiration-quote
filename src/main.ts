@@ -6,6 +6,7 @@ import { buildMessage } from "./core/messageBuilder";
 import { fetchWikipediaSummary, resolveWikipediaUrl } from "./services/wikipedia";
 import { generateLocalizedContent } from "./services/openai";
 import { sendEmailMessage } from "./services/email";
+import { listActiveSubscribers } from "./services/subscribers";
 
 function parseBool(value: string | undefined): boolean {
   if (!value) return false;
@@ -51,6 +52,15 @@ function defaultQuestionPrefix(language: string): string {
 function defaultSubject(language: string): string {
   if (language === "he") return "השראה יומית";
   return "Daily Inspiration";
+}
+
+function hasSubscriberDatabase(): boolean {
+  return Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.PUBLIC_BASE_URL);
+}
+
+function withUnsubscribeLink(message: string, token: string): string {
+  const baseUrl = (process.env.PUBLIC_BASE_URL || "").replace(/\/$/, "");
+  return `${message}\n\nלהסרה מהמייל היומי:\n${baseUrl}/unsubscribe?token=${encodeURIComponent(token)}`;
 }
 
 async function run(): Promise<void> {
@@ -115,7 +125,17 @@ async function run(): Promise<void> {
   }
 
   console.log("Sending email...");
-  await sendEmailMessage(subject, message);
+  if (hasSubscriberDatabase()) {
+    const subscribers = await listActiveSubscribers();
+    console.log(`Active subscribers: ${subscribers.length}`);
+    for (const subscriber of subscribers) {
+      await sendEmailMessage(subject, withUnsubscribeLink(message, subscriber.unsubscribeToken), {
+        to: subscriber.email
+      });
+    }
+  } else {
+    await sendEmailMessage(subject, message);
+  }
 
   const today = new Date().toISOString().slice(0, 10);
   await appendSentLog({ date: today, quoteId: selection.quote.id });

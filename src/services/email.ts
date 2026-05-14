@@ -40,14 +40,18 @@ function isTransientSmtpError(err: unknown): boolean {
   return ["ECONNECTION", "ETIMEDOUT", "ESOCKET", "ECONNRESET"].includes(code);
 }
 
-export async function sendEmailMessage(subject: string, text: string): Promise<void> {
+export async function sendEmailMessage(
+  subject: string,
+  text: string,
+  options: { to?: string } = {}
+): Promise<void> {
   const host = getEnv("SMTP_HOST");
   const port = parsePort(process.env.SMTP_PORT);
   const secure = parseBool(process.env.SMTP_SECURE, port === 465);
   const user = getEnv("SMTP_USER");
   const pass = getEnv("SMTP_PASS");
   const from = (process.env.EMAIL_FROM || "").trim() || user;
-  const to = getEnv("EMAIL_TO");
+  const to = options.to || getEnv("EMAIL_TO");
   const fromName = (process.env.EMAIL_FROM_NAME || "Daily Quote Bot").trim();
 
   const transporter = nodemailer.createTransport({

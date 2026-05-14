@@ -1,13 +1,14 @@
 # Daily Inspiration Quote
 
-`Daily Inspiration Quote` sends one daily inspirational message by email. It picks a quote, translates it into Hebrew, adds a short kid-friendly bio, includes a Wikipedia link, and sends the result to a single email address.
+`Daily Inspiration Quote` is a small Hebrew landing page and daily email product. Parents leave an email, confirm it, and receive one daily inspirational quote with a short kid-friendly story and a Wikipedia link.
 
-The project is designed for one personal recipient first. You can forward the email wherever you want after it arrives.
+The project is designed as a simple free product: one parent email per subscriber, double opt-in verification, and unsubscribe support.
 
 ## Who this is for
 This repo is best for people who are comfortable with:
-- editing a `.env` file
+- editing a `.env.local` file
 - creating API keys and app passwords
+- creating a Supabase project
 - optionally using GitHub Actions for daily automation
 
 If that sounds like you, setup is straightforward.
@@ -17,35 +18,49 @@ If that sounds like you, setup is straightforward.
    ```bash
    npm install
    ```
-2. Create `.env` from `.env.example`.
+2. Create `.env.local` from `.env.example`.
 3. Fill in:
    - `OPENAI_API_KEY`
+   - `SUPABASE_URL`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `PUBLIC_BASE_URL`
    - `SMTP_USER`
    - `SMTP_PASS`
-   - `EMAIL_FROM`
    - `EMAIL_TO`
-4. Check your config:
+4. Run `supabase/schema.sql` in the Supabase SQL editor.
+5. Check your config:
    ```bash
    npm run check-config
    ```
-5. Try a dry run:
+6. Start the Hebrew signup page:
    ```bash
-   DRY_RUN=true npm start
+   npm run dev
    ```
-6. Send a real email:
+7. Build the daily sender:
    ```bash
-   DRY_RUN=false npm start
+   npm run build:worker
    ```
 
 ## Local Use
 You do not need GitHub Actions to use this project.
 
-You can run it manually whenever you want:
+Run the landing page locally:
 ```bash
-npm start
+npm run dev
+```
+
+Run the daily sender manually:
+```bash
+npm run build:worker
+npm run start:worker
 ```
 
 Or schedule it locally with `cron`, `launchd`, or any scheduler you already use.
+
+For local development, use:
+```env
+PUBLIC_BASE_URL=http://localhost:3000
+```
 
 ## GitHub Actions Use
 If you want GitHub to run it every day:
@@ -54,6 +69,21 @@ If you want GitHub to run it every day:
 3. Run the workflow manually once to confirm delivery.
 4. Leave the schedule enabled.
 The workflow lives in `.github/workflows/daily.yml`.
+
+The current workflow sends the daily email to active Supabase subscribers when `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `PUBLIC_BASE_URL` are configured. Without Supabase, it falls back to `EMAIL_TO`.
+
+## Supabase Setup
+Create a Supabase project and run the SQL in `supabase/schema.sql`.
+
+Local and production env need:
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `PUBLIC_BASE_URL`
+
+`PUBLIC_BASE_URL` is the public URL of the site, for example:
+- local: `http://localhost:3000`
+- Vercel: `https://your-project.vercel.app`
+- custom domain: `https://your-domain.com`
 
 ## SMTP Setup
 This project uses SMTP because it is simple and reliable for personal automation.
@@ -75,6 +105,9 @@ See `.env.example`.
 
 Required for normal sending:
 - `OPENAI_API_KEY`
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `PUBLIC_BASE_URL`
 - `SMTP_HOST`
 - `SMTP_USER`
 - `SMTP_PASS`
@@ -98,6 +131,9 @@ Common optional values:
 ## GitHub Secrets
 If you use GitHub Actions, the minimal required repository secrets are:
 - `OPENAI_API_KEY`
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `PUBLIC_BASE_URL`
 - `SMTP_USER`
 - `SMTP_PASS`
 - `EMAIL_TO`
@@ -113,7 +149,7 @@ The workflow already provides sensible defaults for:
 - `SMTP_SECURE=false`
 - `EMAIL_FROM_NAME=Daily Quote Bot`
 - `MIN_DAYS_BETWEEN_REPEATS=90`
-- `INCLUDE_REFLECTION_QUESTION=false`
+- `INCLUDE_REFLECTION_QUESTION=true`
 - `DRY_RUN=false`
 - `CONTENT_LANGUAGE=he`
 - `WIKIPEDIA_LANG=he`
@@ -141,14 +177,19 @@ Build:
 npm run build
 ```
 
+Build the daily sender:
+```bash
+npm run build:worker
+```
+
 Dry run:
 ```bash
-DRY_RUN=true npm start
+DRY_RUN=true npm run start:worker
 ```
 
 Real send:
 ```bash
-DRY_RUN=false npm start
+DRY_RUN=false npm run start:worker
 ```
 
 ## Project Structure
@@ -165,6 +206,13 @@ DRY_RUN=false npm start
     messageBuilder.ts
     storage.ts
   main.ts
+/app
+  page.tsx
+  /api
+    /subscribe
+      route.ts
+/supabase
+  schema.sql
 /data
   sent.json
 /tests

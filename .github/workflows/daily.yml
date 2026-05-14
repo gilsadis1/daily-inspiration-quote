@@ -7,7 +7,7 @@ env:
   SMTP_SECURE: "false"
   EMAIL_FROM_NAME: Daily Quote Bot
   MIN_DAYS_BETWEEN_REPEATS: "90"
-  INCLUDE_REFLECTION_QUESTION: "false"
+  INCLUDE_REFLECTION_QUESTION: "true"
   DRY_RUN: "false"
   CONTENT_LANGUAGE: "he"
   WIKIPEDIA_LANG: "he"
@@ -55,11 +55,14 @@ jobs:
         run: npm test
 
       - name: Build
-        run: npm run build
+        run: npm run build:worker
 
       - name: Check config
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          PUBLIC_BASE_URL: ${{ secrets.PUBLIC_BASE_URL }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
@@ -70,12 +73,15 @@ jobs:
       - name: Start
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          PUBLIC_BASE_URL: ${{ secrets.PUBLIC_BASE_URL }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_SUBJECT: ${{ secrets.EMAIL_SUBJECT }}
-        run: npm start
+        run: npm run start:worker
 
       - name: Save sent history
         if: always()

@@ -89,7 +89,7 @@ async function generateOnce(
   const systemPrompt =
     `You are a ${langLabel} writing assistant for kids (ages 10-13). ` +
     `Return ONLY valid JSON. Use simple ${langLabel}. No long paragraphs. ` +
-    "No exaggerations presented as facts. If unsure, keep it general.";
+    "Write with curiosity, not hype. No exaggerations presented as facts. If unsure, keep it general.";
 
   const genderHint =
     quote.gender === "female"
@@ -110,11 +110,16 @@ async function generateOnce(
 
   const userPrompt = [
     `Translate the quote to ${langLabel}.`,
-    `Create 2-3 short ${langLabel} sentences about the author to spark curiosity for kids.`,
+    `Create exactly 3 short ${langLabel} bio lines about the author to spark curiosity for kids.`,
+    "Line 1: a concrete surprising detail, obstacle, or unusual beginning from the author's story.",
+    "Line 2: connect that detail to grit, curiosity, learning, courage, or recovering from setbacks.",
+    "Line 3: a teaser that makes a kid want to open the Wikipedia link, without saying 'click the link'.",
     nameRule,
     genderHint,
     languageRule,
     "Use the Wikipedia summary as grounding context, but do not copy it.",
+    "Avoid generic encyclopedia lines like 'was an American athlete' unless needed for context.",
+    "Keep each bio line under 22 words.",
     "Output JSON with keys: quote_he, author_he, bio_lines (array), reflection_question (string or empty).",
     includeReflection
       ? `Also include a short reflection question in ${langLabel}.`

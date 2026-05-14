@@ -17,6 +17,9 @@ function main(): void {
   const dryRun = parseBool(process.env.DRY_RUN);
   const missing = requireVars([
     "OPENAI_API_KEY",
+    "SUPABASE_URL",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "PUBLIC_BASE_URL",
     "CONTENT_LANGUAGE",
     "WIKIPEDIA_LANG",
     "MIN_DAYS_BETWEEN_REPEATS",

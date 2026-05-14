@@ -3,22 +3,32 @@
   "version": "1.0.0",
   "description": "Daily inspirational quote email in Hebrew",
   "private": true,
-  "type": "commonjs",
   "main": "dist/main.js",
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/main.js",
-    "dev": "tsx src/main.ts",
+    "build": "next build",
+    "start": "next start",
+    "dev": "next dev",
+    "build:worker": "tsc -p tsconfig.worker.json",
+    "start:worker": "node dist/main.js",
+    "dev:worker": "tsx src/main.ts",
     "check-config": "tsx src/checkConfig.ts",
     "test": "vitest run"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.105.4",
     "dotenv": "^16.4.5",
-    "nodemailer": "^6.9.16"
+    "next": "^16.2.6",
+    "nodemailer": "^6.9.16",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "ws": "^8.20.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.30",
     "@types/nodemailer": "^6.4.16",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@types/ws": "^8.18.1",
     "tsx": "^4.7.2",
     "typescript": "^5.4.5",
     "vitest": "^1.5.3"
