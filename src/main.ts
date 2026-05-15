@@ -14,6 +14,10 @@ import {
   recordSubscriberDelivery,
   todayDateString
 } from "./services/subscriberDeliveries";
+import {
+  assertWithinDailyRecipientCap,
+  getMaxDailyEmailRecipients
+} from "./core/recipientCap";
 
 function parseBool(value: string | undefined): boolean {
   if (!value) return false;
@@ -146,6 +150,8 @@ async function run(): Promise<void> {
   if (hasSubscriberDatabase()) {
     const subscribers = await listActiveSubscribers();
     console.log(`Active subscribers: ${subscribers.length}`);
+    const pendingSubscribers = [];
+
     for (const subscriber of subscribers) {
       const alreadySentToday = await hasSubscriberDeliveryForDate(subscriber.id, today);
       if (alreadySentToday) {
@@ -153,6 +159,14 @@ async function run(): Promise<void> {
         continue;
       }
 
+      pendingSubscribers.push(subscriber);
+    }
+
+    const maxRecipients = getMaxDailyEmailRecipients();
+    assertWithinDailyRecipientCap(pendingSubscribers.length, maxRecipients);
+    console.log(`Recipients pending today: ${pendingSubscribers.length}/${maxRecipients}`);
+
+    for (const subscriber of pendingSubscribers) {
       await sendEmailMessage(subject, withUnsubscribeLink(message, subscriber.unsubscribeToken), {
         to: subscriber.email
       });

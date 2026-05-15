@@ -95,6 +95,8 @@ Local and production env need:
 ## SMTP Setup
 This project uses SMTP because it is simple and reliable for personal automation.
 
+Personal Gmail is intentionally treated as a starter sender, not a bulk email provider. By default, the daily worker stops before sending if more than `100` recipients are pending for the day. Configure this with `MAX_DAILY_EMAIL_RECIPIENTS`. If you hit the cap, move to a production email provider before continuing.
+
 Example Gmail setup:
 1. Turn on 2-Step Verification in your Google account.
 2. Generate an app password.
@@ -127,6 +129,7 @@ Common optional values:
 - `OPENAI_MODEL`
 - `EMAIL_FROM_NAME`
 - `EMAIL_SUBJECT`
+- `MAX_DAILY_EMAIL_RECIPIENTS`
 - `MIN_DAYS_BETWEEN_REPEATS`
 - `INCLUDE_REFLECTION_QUESTION`
 - `DRY_RUN`
@@ -157,6 +160,7 @@ The workflow already provides sensible defaults for:
 - `SMTP_PORT=587`
 - `SMTP_SECURE=false`
 - `EMAIL_FROM_NAME=Daily Quote Bot`
+- `MAX_DAILY_EMAIL_RECIPIENTS=100`
 - `MIN_DAYS_BETWEEN_REPEATS=90`
 - `INCLUDE_REFLECTION_QUESTION=true`
 - `DRY_RUN=false`

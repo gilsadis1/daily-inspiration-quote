@@ -70,6 +70,11 @@ function main(): void {
     badValues.push("SMTP_PORT must be a positive integer");
   }
 
+  const maxDailyRecipients = Number(process.env.MAX_DAILY_EMAIL_RECIPIENTS || "100");
+  if (!Number.isInteger(maxDailyRecipients) || maxDailyRecipients < 1) {
+    badValues.push("MAX_DAILY_EMAIL_RECIPIENTS must be a positive integer");
+  }
+
   if (uniqueMissing.length === 0 && badValues.length === 0) {
     console.log("Config check passed.");
     console.log(`DRY_RUN=${dryRun ? "true" : "false"}`);
