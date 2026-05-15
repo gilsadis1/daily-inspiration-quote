@@ -9,6 +9,14 @@ export type Subscriber = {
   status: SubscriberStatus;
 };
 
+export type VerificationResult = {
+  verified: boolean;
+  subscriber?: {
+    id: string;
+    email: string;
+  };
+};
+
 function getEnv(name: string): string {
   const value = process.env[name];
   if (!value) {
@@ -126,7 +134,7 @@ export async function createSignup(emailInput: string): Promise<{
   return { email, verificationToken };
 }
 
-export async function verifySubscriber(token: string): Promise<boolean> {
+export async function verifySubscriber(token: string): Promise<VerificationResult> {
   const supabase = getSupabaseAdmin();
   const tokenHash = hashToken(token);
   const now = new Date().toISOString();
@@ -141,7 +149,7 @@ export async function verifySubscriber(token: string): Promise<boolean> {
     throw tokenResult.error;
   }
   if (!tokenResult.data || tokenResult.data.used_at || tokenResult.data.expires_at < now) {
-    return false;
+    return { verified: false };
   }
 
   const subscriberUpdate = await supabase
@@ -151,7 +159,9 @@ export async function verifySubscriber(token: string): Promise<boolean> {
       verified_at: now,
       updated_at: now
     })
-    .eq("id", tokenResult.data.subscriber_id);
+    .eq("id", tokenResult.data.subscriber_id)
+    .select("id,email,status")
+    .single<Subscriber>();
 
   if (subscriberUpdate.error) {
     throw subscriberUpdate.error;
@@ -166,7 +176,13 @@ export async function verifySubscriber(token: string): Promise<boolean> {
     throw tokenUpdate.error;
   }
 
-  return true;
+  return {
+    verified: true,
+    subscriber: {
+      id: subscriberUpdate.data.id,
+      email: subscriberUpdate.data.email
+    }
+  };
 }
 
 export async function unsubscribeByToken(token: string): Promise<boolean> {
@@ -192,7 +208,7 @@ export async function unsubscribeByToken(token: string): Promise<boolean> {
   return true;
 }
 
-export async function listActiveSubscribers(): Promise<Array<{ email: string; unsubscribeToken: string }>> {
+export async function listActiveSubscribers(): Promise<Array<{ id: string; email: string; unsubscribeToken: string }>> {
   const supabase = getSupabaseAdmin();
   const result = await supabase
     .from("subscribers")
@@ -205,6 +221,7 @@ export async function listActiveSubscribers(): Promise<Array<{ email: string; un
 
   return (result.data || [])
     .map((row) => ({
+      id: row.id,
       email: row.email,
       unsubscribeToken: createUnsubscribeToken(row.id)
     }));

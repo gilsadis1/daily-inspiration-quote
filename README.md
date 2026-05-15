@@ -1,6 +1,6 @@
 # Daily Inspiration Quote
 
-`Daily Inspiration Quote` is a small Hebrew landing page and daily email product. Parents leave an email, confirm it, and receive one daily inspirational quote with a short kid-friendly story and a Wikipedia link.
+`Daily Inspiration Quote` is a small Hebrew landing page and daily email product. Parents leave an email, confirm it, immediately receive a welcome quote, and then receive one daily inspirational quote with a short kid-friendly story and a Wikipedia link.
 
 The project is designed as a simple free product: one parent email per subscriber, double opt-in verification, and unsubscribe support.
 
@@ -26,7 +26,6 @@ If that sounds like you, setup is straightforward.
    - `PUBLIC_BASE_URL`
    - `SMTP_USER`
    - `SMTP_PASS`
-   - `EMAIL_TO`
 4. Run `supabase/schema.sql` in the Supabase SQL editor.
 5. Check your config:
    ```bash
@@ -70,7 +69,7 @@ If you want GitHub to run it every day:
 4. Leave the schedule enabled.
 The workflow lives in `.github/workflows/daily.yml`.
 
-The current workflow sends the daily email to active Supabase subscribers when `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `PUBLIC_BASE_URL` are configured. It also stores sent quote history in Supabase so quote rotation stays reliable across GitHub Actions runs. Without Supabase, it falls back to `EMAIL_TO` and local `data/sent.json`.
+The current workflow sends the daily email to active Supabase subscribers when `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `PUBLIC_BASE_URL` are configured. It also stores sent quote history in Supabase so quote rotation stays reliable across GitHub Actions runs. New subscribers receive one static welcome quote after verification, and the daily workflow skips anyone who already received a quote that day. Without Supabase, it falls back to `EMAIL_TO` and local `data/sent.json`.
 
 ## Supabase Setup
 Create a Supabase project and run the SQL in `supabase/schema.sql`.
@@ -79,6 +78,7 @@ The schema creates:
 - `subscribers` for email signup status
 - `verification_tokens` for double opt-in links
 - `sent_quotes` for repeat prevention
+- `subscriber_deliveries` for per-subscriber same-day delivery tracking
 
 RLS is enabled on all tables. The app uses `SUPABASE_SERVICE_ROLE_KEY` only on the server side, so no public table policies are required for this MVP.
 
@@ -118,8 +118,10 @@ Required for normal sending:
 - `SMTP_HOST`
 - `SMTP_USER`
 - `SMTP_PASS`
-- `EMAIL_TO`
 - `EMAIL_FROM` if you want it to be different from `SMTP_USER`
+
+Required only if you are not using Supabase subscribers:
+- `EMAIL_TO`
 
 Common optional values:
 - `OPENAI_MODEL`
@@ -143,9 +145,9 @@ If you use GitHub Actions, the minimal required repository secrets are:
 - `PUBLIC_BASE_URL`
 - `SMTP_USER`
 - `SMTP_PASS`
-- `EMAIL_TO`
 
 Optional secrets:
+- `EMAIL_TO` if you want single-recipient fallback without Supabase subscribers
 - `EMAIL_FROM`
 - `EMAIL_SUBJECT`
 

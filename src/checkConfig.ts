@@ -13,8 +13,17 @@ function validateEmail(value: string | undefined): boolean {
   return !!value && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
+function hasSubscriberDelivery(): boolean {
+  return Boolean(
+    (process.env.SUPABASE_URL || "").trim() &&
+      (process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim() &&
+      (process.env.PUBLIC_BASE_URL || "").trim()
+  );
+}
+
 function main(): void {
   const dryRun = parseBool(process.env.DRY_RUN);
+  const subscriberDelivery = hasSubscriberDelivery();
   const missing = requireVars([
     "OPENAI_API_KEY",
     "SUPABASE_URL",
@@ -31,10 +40,13 @@ function main(): void {
       ...requireVars([
         "SMTP_HOST",
         "SMTP_USER",
-        "SMTP_PASS",
-        "EMAIL_TO"
+        "SMTP_PASS"
       ])
     );
+
+    if (!subscriberDelivery) {
+      missing.push(...requireVars(["EMAIL_TO"]));
+    }
   }
 
   const uniqueMissing = [...new Set(missing)];
@@ -45,8 +57,11 @@ function main(): void {
     if (!validateEmail(from)) {
       badValues.push("EMAIL_FROM must be a valid email address");
     }
-    if (!validateEmail(process.env.EMAIL_TO)) {
+    if (!subscriberDelivery && !validateEmail(process.env.EMAIL_TO)) {
       badValues.push("EMAIL_TO must be a valid email address");
+    }
+    if (subscriberDelivery && process.env.EMAIL_TO && !validateEmail(process.env.EMAIL_TO)) {
+      badValues.push("EMAIL_TO must be a valid email address when provided");
     }
   }
 

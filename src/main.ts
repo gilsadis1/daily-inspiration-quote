@@ -9,6 +9,11 @@ import { sendEmailMessage } from "./services/email";
 import { listActiveSubscribers } from "./services/subscribers";
 import { hasSupabaseConfig } from "./services/supabase";
 import { appendSentQuote, readSentQuotes } from "./services/sentQuotes";
+import {
+  hasSubscriberDeliveryForDate,
+  recordSubscriberDelivery,
+  todayDateString
+} from "./services/subscriberDeliveries";
 
 function parseBool(value: string | undefined): boolean {
   if (!value) return false;
@@ -135,19 +140,40 @@ async function run(): Promise<void> {
   }
 
   console.log("Sending email...");
+  const today = todayDateString();
+  let sentCount = 0;
+
   if (hasSubscriberDatabase()) {
     const subscribers = await listActiveSubscribers();
     console.log(`Active subscribers: ${subscribers.length}`);
     for (const subscriber of subscribers) {
+      const alreadySentToday = await hasSubscriberDeliveryForDate(subscriber.id, today);
+      if (alreadySentToday) {
+        console.log(`Skipping ${subscriber.email}: already received a quote today.`);
+        continue;
+      }
+
       await sendEmailMessage(subject, withUnsubscribeLink(message, subscriber.unsubscribeToken), {
         to: subscriber.email
       });
+      await recordSubscriberDelivery({
+        subscriberId: subscriber.id,
+        quoteId: selection.quote.id,
+        sentDate: today,
+        deliveryType: "daily"
+      });
+      sentCount += 1;
     }
   } else {
     await sendEmailMessage(subject, message);
+    sentCount = 1;
   }
 
-  const today = new Date().toISOString().slice(0, 10);
+  if (sentCount === 0) {
+    console.log("No emails sent. Sent quote history was not updated.");
+    return;
+  }
+
   const sentEntry = { date: today, quoteId: selection.quote.id };
   await appendSentLog(sentEntry);
   if (hasSupabaseConfig()) {

@@ -31,6 +31,22 @@ create table if not exists public.sent_quotes (
 
 create index if not exists sent_quotes_sent_date_idx on public.sent_quotes(sent_date);
 
+create table if not exists public.subscriber_deliveries (
+  id uuid primary key default gen_random_uuid(),
+  subscriber_id uuid not null references public.subscribers(id) on delete cascade,
+  quote_id text not null,
+  sent_date date not null,
+  delivery_type text not null check (delivery_type in ('welcome', 'daily')),
+  created_at timestamptz not null default now(),
+  unique (subscriber_id, sent_date)
+);
+
+create index if not exists subscriber_deliveries_subscriber_id_idx
+  on public.subscriber_deliveries(subscriber_id);
+create index if not exists subscriber_deliveries_sent_date_idx
+  on public.subscriber_deliveries(sent_date);
+
 alter table public.subscribers enable row level security;
 alter table public.verification_tokens enable row level security;
 alter table public.sent_quotes enable row level security;
+alter table public.subscriber_deliveries enable row level security;
