@@ -26,8 +26,9 @@ function toHtml(text: string): string {
   return [
     "<!doctype html>",
     '<html lang="he" dir="rtl">',
-    "<body>",
-    '<div style="font-family: Arial, sans-serif; line-height: 1.7; white-space: pre-wrap;">',
+    '<head><meta charset="utf-8"></head>',
+    '<body dir="rtl" style="margin:0; direction:rtl; text-align:right;">',
+    '<div dir="rtl" style="direction:rtl; text-align:right; unicode-bidi:plaintext; font-family: Arial, sans-serif; line-height:1.7; white-space:pre-wrap;">',
     escaped,
     "</div>",
     "</body>",
