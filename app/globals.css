@@ -16,10 +16,12 @@
 
 html {
   background: var(--bg);
+  overflow-x: hidden;
 }
 
 body {
   margin: 0;
+  overflow-x: hidden;
   color: var(--ink);
   background:
     radial-gradient(circle at 12% 18%, rgba(243, 180, 75, 0.22), transparent 28rem),
@@ -33,12 +35,16 @@ main {
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(28rem, 1.1fr);
-  gap: 3rem;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(1.5rem, 4vw, 3rem);
   width: min(72rem, calc(100% - 2rem));
   margin: 0 auto;
   padding: 5rem 0 3rem;
   align-items: center;
+}
+
+.hero > * {
+  min-width: 0;
 }
 
 .eyebrow {
@@ -148,6 +154,7 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
+  max-width: 100%;
   overflow: hidden;
   border: 1px solid rgba(31, 111, 80, 0.25);
   border-radius: 1.4rem;
@@ -206,6 +213,7 @@ button:disabled {
 
 .message-card {
   position: relative;
+  max-width: 100%;
   border-radius: 1.1rem;
   padding: 0.95rem 1rem;
   line-height: 1.55;
@@ -226,6 +234,7 @@ button:disabled {
 .example-link {
   color: var(--leaf);
   font-weight: 900;
+  overflow-wrap: anywhere;
   text-decoration-thickness: 0.12em;
   text-underline-offset: 0.18em;
 }
@@ -241,7 +250,7 @@ button:disabled {
 
 .child-message {
   align-self: flex-end;
-  max-width: 72%;
+  max-width: min(72%, 100%);
   background: #ffffff;
 }
 
@@ -379,6 +388,7 @@ button:disabled {
 .examples,
 .why {
   width: min(72rem, calc(100% - 2rem));
+  max-width: 100%;
   margin: 0 auto;
   padding: 3rem 0;
 }
