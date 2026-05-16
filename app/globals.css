@@ -440,6 +440,28 @@ blockquote {
   line-height: 1.6;
 }
 
+.site-footer {
+  width: min(72rem, calc(100% - 2rem));
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 1.5rem 0 3rem;
+  border-top: 1px solid rgba(31, 111, 80, 0.18);
+  color: var(--muted);
+  font-size: 0.98rem;
+  line-height: 1.6;
+}
+
+.site-footer p {
+  margin-bottom: 0.35rem;
+}
+
+.site-footer a {
+  color: var(--leaf);
+  font-weight: 900;
+  text-decoration-thickness: 0.12em;
+  text-underline-offset: 0.18em;
+}
+
 .status-page {
   display: grid;
   min-height: 100vh;

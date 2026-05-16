@@ -110,6 +110,13 @@ export default function HomePage() {
           <p>זה פותח שיחה על התמדה, כישלון, אומץ ולמידה.</p>
         </div>
       </section>
+
+      <footer className="site-footer">
+        <p>
+          שאלות, רעיונות או בעיות?{" "}
+          <a href="mailto:gilwillread@gmail.com">כתבו לי</a>
+        </p>
+      </footer>
     </main>
   );
 }
