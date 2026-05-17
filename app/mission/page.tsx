@@ -20,7 +20,9 @@ export default function MissionPage() {
           <h2>איך זה התחיל</h2>
           <p>
             אני{" "}
-            <a href="https://www.linkedin.com/in/gilsadis/">גיל סדיס</a>, וזה התחיל
+            <a href="https://www.linkedin.com/in/gilsadis/" target="_blank" rel="noreferrer">
+              גיל סדיס
+            </a>, וזה התחיל
             כפרויקט קטן עם הבנים שלי ובשבילם. בבית אנחנו מדברים הרבה על ספורט,
             התמדה, כישלונות והדרך הארוכה להשתפר.
           </p>
@@ -70,7 +72,12 @@ export default function MissionPage() {
           <Link className="button-link" href="/">
             להצטרפות לציטוט היומי
           </Link>
-          <a className="text-link" href="https://www.instagram.com/gilsadis1/">
+          <a
+            className="text-link"
+            href="https://www.instagram.com/gilsadis1/"
+            target="_blank"
+            rel="noreferrer"
+          >
             הדרך שלנו בכדורסל באינסטגרם
           </a>
         </div>
