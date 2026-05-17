@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { SiteFooter } from "./footer";
+import { SiteNav } from "./nav";
 import { SignupForm } from "./signup-form";
 
 const examples = [
@@ -24,6 +27,7 @@ const examples = [
 export default function HomePage() {
   return (
     <main>
+      <SiteNav />
       <section className="hero">
         <div className="hero-copy">
           <h1>רגע יומי של השראה וסקרנות לילדים</h1>
@@ -111,12 +115,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <footer className="site-footer">
-        <p>
-          שאלות, רעיונות או בעיות?{" "}
-          <a href="mailto:gilwillread@gmail.com">כתבו לי</a>
-        </p>
-      </footer>
+      <SiteFooter />
     </main>
   );
 }
