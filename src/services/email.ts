@@ -1,5 +1,7 @@
 import nodemailer from "nodemailer";
 
+type EmailProvider = "smtp" | "brevo";
+
 function getEnv(name: string): string {
   const value = process.env[name];
   if (!value) {
@@ -15,6 +17,14 @@ function parsePort(value: string | undefined): number {
 function parseBool(value: string | undefined, fallback: boolean): boolean {
   if (!value) return fallback;
   return ["1", "true", "yes", "y"].includes(value.toLowerCase());
+}
+
+function getEmailProvider(): EmailProvider {
+  const provider = (process.env.EMAIL_PROVIDER || "smtp").trim().toLowerCase();
+  if (provider !== "smtp" && provider !== "brevo") {
+    throw new Error("EMAIL_PROVIDER must be either smtp or brevo");
+  }
+  return provider;
 }
 
 function toHtml(text: string): string {
@@ -36,12 +46,36 @@ function toHtml(text: string): string {
   ].join("");
 }
 
+function senderName(): string {
+  return (process.env.EMAIL_FROM_NAME || "Daily Quote Bot").trim();
+}
+
+function senderEmail(fallback?: string): string {
+  const from = (process.env.EMAIL_FROM || "").trim() || fallback;
+  if (!from) {
+    throw new Error("Missing environment variable: EMAIL_FROM");
+  }
+  return from;
+}
+
+function recipientEmail(to?: string): string {
+  return to || getEnv("EMAIL_TO");
+}
+
+function replyToEmail(): string | undefined {
+  return (process.env.EMAIL_REPLY_TO || "").trim() || undefined;
+}
+
 function isTransientSmtpError(err: unknown): boolean {
   const code = String((err as { code?: string })?.code || "");
   return ["ECONNECTION", "ETIMEDOUT", "ESOCKET", "ECONNRESET"].includes(code);
 }
 
-export async function sendEmailMessage(
+function isTransientBrevoError(status: number): boolean {
+  return status === 429 || status >= 500;
+}
+
+async function sendSmtpEmail(
   subject: string,
   text: string,
   options: { to?: string } = {}
@@ -51,9 +85,10 @@ export async function sendEmailMessage(
   const secure = parseBool(process.env.SMTP_SECURE, port === 465);
   const user = getEnv("SMTP_USER");
   const pass = getEnv("SMTP_PASS");
-  const from = (process.env.EMAIL_FROM || "").trim() || user;
-  const to = options.to || getEnv("EMAIL_TO");
-  const fromName = (process.env.EMAIL_FROM_NAME || "Daily Quote Bot").trim();
+  const from = senderEmail(user);
+  const to = recipientEmail(options.to);
+  const fromName = senderName();
+  const replyTo = replyToEmail();
 
   const transporter = nodemailer.createTransport({
     host,
@@ -71,6 +106,7 @@ export async function sendEmailMessage(
       const info = await transporter.sendMail({
         from: `${fromName} <${from}>`,
         to,
+        replyTo,
         subject,
         text,
         html: toHtml(text)
@@ -89,4 +125,75 @@ export async function sendEmailMessage(
   }
 
   throw lastError instanceof Error ? lastError : new Error("SMTP email send failed");
+}
+
+async function sendBrevoEmail(
+  subject: string,
+  text: string,
+  options: { to?: string } = {}
+): Promise<void> {
+  const apiKey = getEnv("BREVO_API_KEY");
+  const from = senderEmail();
+  const to = recipientEmail(options.to);
+  const fromName = senderName();
+  const replyTo = replyToEmail();
+
+  const body = {
+    sender: { email: from, name: fromName },
+    to: [{ email: to }],
+    ...(replyTo ? { replyTo: { email: replyTo } } : {}),
+    subject,
+    textContent: text,
+    htmlContent: toHtml(text)
+  };
+
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    try {
+      const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "api-key": apiKey
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (!response.ok) {
+        const responseBody = await response.text();
+        throw new Error(`Brevo error ${response.status}: ${responseBody}`);
+      }
+
+      const responseBody = await response.json().catch(() => ({}));
+      const messageId = (responseBody as { messageId?: string }).messageId || "unknown";
+      console.log(`Email queued via Brevo: ${messageId}`);
+      return;
+    } catch (err: unknown) {
+      lastError = err;
+      const message = (err as { message?: string })?.message || "Unknown Brevo error";
+      const statusMatch = message.match(/Brevo error (\d+)/);
+      const status = statusMatch ? Number(statusMatch[1]) : 0;
+      console.error(`Brevo send attempt ${attempt} failed: ${message}`);
+      if (attempt >= 2 || !isTransientBrevoError(status)) {
+        break;
+      }
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error("Brevo email send failed");
+}
+
+export async function sendEmailMessage(
+  subject: string,
+  text: string,
+  options: { to?: string } = {}
+): Promise<void> {
+  const provider = getEmailProvider();
+  if (provider === "brevo") {
+    await sendBrevoEmail(subject, text, options);
+    return;
+  }
+
+  await sendSmtpEmail(subject, text, options);
 }

@@ -92,8 +92,10 @@ Local and production env need:
 - Vercel: `https://your-project.vercel.app`
 - custom domain: `https://your-domain.com`
 
-## SMTP Setup
-This project uses SMTP because it is simple and reliable for personal automation.
+## Email Setup
+This project supports two email providers:
+- `smtp` for simple personal automation
+- `brevo` for a more scalable sender
 
 Personal Gmail is intentionally treated as a starter sender, not a bulk email provider. By default, the daily worker stops before sending if more than `100` recipients are pending for the day. Configure this with `MAX_DAILY_EMAIL_RECIPIENTS`. If you hit the cap, move to a production email provider before continuing.
 
@@ -109,6 +111,16 @@ Example Gmail setup:
    - `EMAIL_FROM=your_email@gmail.com`
    - `EMAIL_TO=your_email@gmail.com`
 
+Example Brevo setup:
+1. Authenticate your sending domain in Brevo.
+2. Create an API key.
+3. Use:
+   - `EMAIL_PROVIDER=brevo`
+   - `BREVO_API_KEY=your_brevo_api_key`
+   - `EMAIL_FROM=hello@your-domain.com`
+   - `EMAIL_FROM_NAME=SparkQuest`
+   - `EMAIL_REPLY_TO=you@example.com`
+
 ## Environment Variables
 See `.env.example`.
 
@@ -117,10 +129,16 @@ Required for normal sending:
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `PUBLIC_BASE_URL`
+- `EMAIL_PROVIDER`
+- `EMAIL_FROM`
+
+Required for `EMAIL_PROVIDER=smtp`:
 - `SMTP_HOST`
 - `SMTP_USER`
 - `SMTP_PASS`
-- `EMAIL_FROM` if you want it to be different from `SMTP_USER`
+
+Required for `EMAIL_PROVIDER=brevo`:
+- `BREVO_API_KEY`
 
 Required only if you are not using Supabase subscribers:
 - `EMAIL_TO`
@@ -128,6 +146,7 @@ Required only if you are not using Supabase subscribers:
 Common optional values:
 - `OPENAI_MODEL`
 - `EMAIL_FROM_NAME`
+- `EMAIL_REPLY_TO`
 - `EMAIL_SUBJECT`
 - `MAX_DAILY_EMAIL_RECIPIENTS`
 - `MIN_DAYS_BETWEEN_REPEATS`
@@ -146,16 +165,24 @@ If you use GitHub Actions, the minimal required repository secrets are:
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `PUBLIC_BASE_URL`
+- `EMAIL_PROVIDER`
+- `EMAIL_FROM`
+
+If using Brevo:
+- `BREVO_API_KEY`
+
+If using SMTP:
 - `SMTP_USER`
 - `SMTP_PASS`
 
 Optional secrets:
 - `EMAIL_TO` if you want single-recipient fallback without Supabase subscribers
-- `EMAIL_FROM`
+- `EMAIL_REPLY_TO`
 - `EMAIL_SUBJECT`
 
 The workflow already provides sensible defaults for:
 - `OPENAI_MODEL=gpt-4o-mini`
+- `EMAIL_PROVIDER=smtp`
 - `SMTP_HOST=smtp.gmail.com`
 - `SMTP_PORT=587`
 - `SMTP_SECURE=false`

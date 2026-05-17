@@ -13,6 +13,14 @@ function validateEmail(value: string | undefined): boolean {
   return !!value && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
+function emailProvider(): "smtp" | "brevo" | "invalid" {
+  const provider = (process.env.EMAIL_PROVIDER || "smtp").trim().toLowerCase();
+  if (provider === "smtp" || provider === "brevo") {
+    return provider;
+  }
+  return "invalid";
+}
+
 function hasSubscriberDelivery(): boolean {
   return Boolean(
     (process.env.SUPABASE_URL || "").trim() &&
@@ -24,6 +32,7 @@ function hasSubscriberDelivery(): boolean {
 function main(): void {
   const dryRun = parseBool(process.env.DRY_RUN);
   const subscriberDelivery = hasSubscriberDelivery();
+  const provider = emailProvider();
   const missing = requireVars([
     "OPENAI_API_KEY",
     "SUPABASE_URL",
@@ -36,13 +45,17 @@ function main(): void {
   ]);
 
   if (!dryRun) {
-    missing.push(
-      ...requireVars([
-        "SMTP_HOST",
-        "SMTP_USER",
-        "SMTP_PASS"
-      ])
-    );
+    if (provider === "brevo") {
+      missing.push(...requireVars(["BREVO_API_KEY", "EMAIL_FROM"]));
+    } else {
+      missing.push(
+        ...requireVars([
+          "SMTP_HOST",
+          "SMTP_USER",
+          "SMTP_PASS"
+        ])
+      );
+    }
 
     if (!subscriberDelivery) {
       missing.push(...requireVars(["EMAIL_TO"]));
@@ -52,10 +65,17 @@ function main(): void {
   const uniqueMissing = [...new Set(missing)];
   const badValues: string[] = [];
 
+  if (provider === "invalid") {
+    badValues.push("EMAIL_PROVIDER must be either smtp or brevo");
+  }
+
   if (!dryRun) {
-    const from = (process.env.EMAIL_FROM || "").trim() || process.env.SMTP_USER;
+    const from = (process.env.EMAIL_FROM || "").trim() || (provider === "smtp" ? process.env.SMTP_USER : "");
     if (!validateEmail(from)) {
       badValues.push("EMAIL_FROM must be a valid email address");
+    }
+    if (process.env.EMAIL_REPLY_TO && !validateEmail(process.env.EMAIL_REPLY_TO)) {
+      badValues.push("EMAIL_REPLY_TO must be a valid email address when provided");
     }
     if (!subscriberDelivery && !validateEmail(process.env.EMAIL_TO)) {
       badValues.push("EMAIL_TO must be a valid email address");
@@ -66,7 +86,7 @@ function main(): void {
   }
 
   const port = Number(process.env.SMTP_PORT || "587");
-  if (!Number.isInteger(port) || port <= 0) {
+  if (provider === "smtp" && (!Number.isInteger(port) || port <= 0)) {
     badValues.push("SMTP_PORT must be a positive integer");
   }
 

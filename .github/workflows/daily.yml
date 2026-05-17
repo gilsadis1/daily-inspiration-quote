@@ -2,6 +2,7 @@ name: Daily Inspiration Quote
 
 env:
   OPENAI_MODEL: gpt-4o-mini
+  EMAIL_PROVIDER: smtp
   SMTP_HOST: smtp.gmail.com
   SMTP_PORT: "587"
   SMTP_SECURE: "false"
@@ -55,10 +56,13 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           PUBLIC_BASE_URL: ${{ secrets.PUBLIC_BASE_URL }}
+          EMAIL_PROVIDER: ${{ secrets.EMAIL_PROVIDER || vars.EMAIL_PROVIDER || env.EMAIL_PROVIDER }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_REPLY_TO: ${{ secrets.EMAIL_REPLY_TO }}
           EMAIL_SUBJECT: ${{ secrets.EMAIL_SUBJECT }}
         run: npm run check-config
 
@@ -68,9 +72,12 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           PUBLIC_BASE_URL: ${{ secrets.PUBLIC_BASE_URL }}
+          EMAIL_PROVIDER: ${{ secrets.EMAIL_PROVIDER || vars.EMAIL_PROVIDER || env.EMAIL_PROVIDER }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_REPLY_TO: ${{ secrets.EMAIL_REPLY_TO }}
           EMAIL_SUBJECT: ${{ secrets.EMAIL_SUBJECT }}
         run: npm run start:worker
