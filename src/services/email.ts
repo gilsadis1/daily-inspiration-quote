@@ -28,22 +28,56 @@ function getEmailProvider(): EmailProvider {
 }
 
 function toHtml(text: string): string {
-  const escaped = text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  const lines = text.split("\n");
+  const htmlLines: string[] = [];
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    const nextLine = lines[index + 1] || "";
+
+    if (line.includes("להסרה מהמייל היומי") && /^https?:\/\/\S+/.test(nextLine.trim())) {
+      htmlLines.push(
+        `${escapeHtml(line)} <a href="${escapeAttribute(nextLine.trim())}" style="color:#1f6f50;font-weight:700;text-decoration:underline;">לחצו כאן</a>`
+      );
+      index += 1;
+      continue;
+    }
+
+    htmlLines.push(linkifyLine(line));
+  }
+
+  const htmlBody = htmlLines.join("<br>");
 
   return [
     "<!doctype html>",
     '<html lang="he" dir="rtl">',
     '<head><meta charset="utf-8"></head>',
     '<body dir="rtl" style="margin:0; direction:rtl; text-align:right;">',
-    '<div dir="rtl" style="direction:rtl; text-align:right; unicode-bidi:plaintext; font-family: Arial, sans-serif; line-height:1.7; white-space:pre-wrap;">',
-    escaped,
+    '<div dir="rtl" style="direction:rtl; text-align:right; unicode-bidi:plaintext; font-family: Arial, sans-serif; line-height:1.7;">',
+    htmlBody,
     "</div>",
     "</body>",
     "</html>"
   ].join("");
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function escapeAttribute(text: string): string {
+  return escapeHtml(text).replace(/"/g, "&quot;");
+}
+
+function linkifyLine(line: string): string {
+  const urlPattern = /(https?:\/\/[^\s]+)/g;
+  return escapeHtml(line).replace(urlPattern, (url) => {
+    const href = escapeAttribute(url);
+    return `<a href="${href}" style="color:#1f6f50;font-weight:700;text-decoration:underline;">${url}</a>`;
+  });
 }
 
 function senderName(): string {
