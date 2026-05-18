@@ -1,15 +1,34 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Daily Inspiration Quote",
-  description: "מייל יומי עם ציטוט השראה וסיפור קצר לילדים"
+  metadataBase: new URL("https://joinsparkquest.com"),
+  title: {
+    default: "SparkQuest - ציטוט יומי לילדים סקרנים",
+    template: "%s | SparkQuest"
+  },
+  description: "מייל יומי בעברית עם ציטוט השראה, סיפור קצר לילדים וקישור לקריאה נוספת.",
+  openGraph: {
+    title: "SparkQuest - ציטוט יומי לילדים סקרנים",
+    description: "מייל יומי בעברית עם ציטוט השראה, סיפור קצר לילדים וקישור לקריאה נוספת.",
+    url: "https://joinsparkquest.com",
+    siteName: "SparkQuest",
+    locale: "he_IL",
+    type: "website"
+  },
+  alternates: {
+    canonical: "/"
+  }
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="he" dir="rtl">
-      <body>{children}</body>
+      <body>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }

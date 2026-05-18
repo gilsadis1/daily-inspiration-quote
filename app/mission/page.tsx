@@ -1,6 +1,20 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { SiteFooter } from "../footer";
 import { SiteNav } from "../nav";
+
+export const metadata: Metadata = {
+  title: "מי אנחנו",
+  description: "המשימה של SparkQuest: לתת לילדים תוכן משמעותי יותר ורגעים קצרים מחוץ למסך.",
+  alternates: {
+    canonical: "/mission"
+  },
+  openGraph: {
+    title: "מי אנחנו | SparkQuest",
+    description: "המשימה של SparkQuest: לתת לילדים תוכן משמעותי יותר ורגעים קצרים מחוץ למסך.",
+    url: "https://joinsparkquest.com/mission"
+  }
+};
 
 export default function MissionPage() {
   return (
@@ -31,7 +45,7 @@ export default function MissionPage() {
             אימונים, משחקים, פספוסים, רגעים טובים והרבה עבודה יומיומית.
           </p>
           <p>
-            מתוך זה נולד הרעיון לשלוח להם בכל יום ציטוט קצר, סיפור קטן על האדם
+            מתוך זה נולד הרעיון לשלוח להם בכל יום ציטוט קצר המעורר השראה, סיפור קטן על האדם
             שמאחוריו, וקישור לקריאה נוספת. משהו קצר מספיק כדי לקרוא, אבל מספיק
             מעניין כדי לפתוח שיחה.
           </p>
