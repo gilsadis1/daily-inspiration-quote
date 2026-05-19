@@ -10,4 +10,12 @@ describe("quote dataset", () => {
     const ids = QUOTES.map((quote) => quote.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
+
+  it("does not include blocked authors", () => {
+    const blockedAuthors = ["Greta Thunberg"];
+    const authors = QUOTES.map((quote) => quote.author);
+    for (const author of blockedAuthors) {
+      expect(authors).not.toContain(author);
+    }
+  });
 });

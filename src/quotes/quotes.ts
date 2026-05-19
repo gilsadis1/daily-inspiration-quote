@@ -433,14 +433,6 @@ export const QUOTES: QuoteItem[] = [
     tags: ["courage", "history"]
   },
   {
-    id: "greta-thunberg-01",
-    author: "Greta Thunberg",
-    gender: "female",
-    quote_en: "No one is too small to make a difference.",
-    wikipedia: "https://en.wikipedia.org/wiki/Greta_Thunberg",
-    tags: ["environment", "leadership"]
-  },
-  {
     id: "ada-lovelace-01",
     author: "Ada Lovelace",
     gender: "female",
