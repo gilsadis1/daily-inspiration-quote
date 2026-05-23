@@ -9,6 +9,7 @@ import { sendEmailMessage } from "./services/email";
 import { listActiveSubscribers } from "./services/subscribers";
 import { hasSupabaseConfig } from "./services/supabase";
 import { appendSentQuote, readSentQuotes } from "./services/sentQuotes";
+import { upsertPublishedQuote } from "./services/publishedQuotes";
 import {
   hasSubscriberDeliveryForDate,
   recordSubscriberDelivery,
@@ -195,6 +196,20 @@ async function run(): Promise<void> {
       await appendSentQuote(sentEntry);
     } catch (err) {
       console.warn("Could not write sent entry to Supabase. Local data/sent.json was still updated.", err);
+    }
+
+    try {
+      await upsertPublishedQuote({
+        sentDate: today,
+        quoteId: selection.quote.id,
+        author: generated.authorHe,
+        quoteText: generated.quoteHe,
+        bioLines: generated.bioLines,
+        wikipediaUrl: wikiUrl,
+        reflectionQuestion: generated.reflectionQuestion
+      });
+    } catch (err) {
+      console.warn("Could not write published quote to Supabase.", err);
     }
   }
 

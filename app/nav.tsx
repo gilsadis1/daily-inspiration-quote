@@ -6,6 +6,7 @@ export function SiteNav() {
       <Link className="brand-link" href="/">
         SparkQuest
       </Link>
+      <Link href="/quotes">ציטוטים קודמים</Link>
       <Link href="/mission">מי אנחנו</Link>
     </nav>
   );

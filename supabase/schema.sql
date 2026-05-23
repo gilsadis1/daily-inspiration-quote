@@ -31,6 +31,21 @@ create table if not exists public.sent_quotes (
 
 create index if not exists sent_quotes_sent_date_idx on public.sent_quotes(sent_date);
 
+create table if not exists public.published_quotes (
+  id uuid primary key default gen_random_uuid(),
+  sent_date date not null,
+  quote_id text not null,
+  author text not null,
+  quote_text text not null,
+  bio_lines text[] not null,
+  wikipedia_url text not null,
+  reflection_question text,
+  created_at timestamptz not null default now(),
+  unique (sent_date, quote_id)
+);
+
+create index if not exists published_quotes_sent_date_idx on public.published_quotes(sent_date desc);
+
 create table if not exists public.subscriber_deliveries (
   id uuid primary key default gen_random_uuid(),
   subscriber_id uuid not null references public.subscribers(id) on delete cascade,
@@ -49,4 +64,5 @@ create index if not exists subscriber_deliveries_sent_date_idx
 alter table public.subscribers enable row level security;
 alter table public.verification_tokens enable row level security;
 alter table public.sent_quotes enable row level security;
+alter table public.published_quotes enable row level security;
 alter table public.subscriber_deliveries enable row level security;
