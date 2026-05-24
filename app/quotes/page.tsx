@@ -77,7 +77,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "ציטוטים קודמים | SparkQuest",
     description: "ספריית השראה לילדים עם ציטוטים קודמים שנשלחו ב-SparkQuest.",
-    url: "https://joinsparkquest.com/quotes"
+    url: "https://www.joinsparkquest.com/quotes"
   }
 };
 

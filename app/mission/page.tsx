@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "מי אנחנו | SparkQuest",
     description: "המשימה של SparkQuest: לתת לילדים תוכן משמעותי יותר ורגעים קצרים מחוץ למסך.",
-    url: "https://joinsparkquest.com/mission"
+    url: "https://www.joinsparkquest.com/mission"
   }
 };
 

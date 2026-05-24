@@ -3,7 +3,7 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://joinsparkquest.com"),
+  metadataBase: new URL("https://www.joinsparkquest.com"),
   title: {
     default: "SparkQuest - ציטוט יומי לילדים סקרנים",
     template: "%s | SparkQuest"
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "SparkQuest - ציטוט יומי לילדים סקרנים",
     description: "מייל יומי בעברית עם ציטוט השראה, סיפור קצר לילדים וקישור לקריאה נוספת.",
-    url: "https://joinsparkquest.com",
+    url: "https://www.joinsparkquest.com",
     siteName: "SparkQuest",
     locale: "he_IL",
     type: "website"
