@@ -34,5 +34,8 @@ export function buildMessage(input: MessageInput): string {
     lines.push(`${input.questionPrefix} ${input.reflectionQuestion.trim()}`);
   }
 
+  lines.push("");
+  lines.push("יש לכם שאלה, רעיון או פידבק? אפשר פשוט להשיב למייל הזה.");
+
   return lines.join("\n");
 }

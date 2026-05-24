@@ -16,5 +16,6 @@ describe("buildMessage", () => {
     expect(message).toContain("\"זה ציטוט\" – שם");
     expect(message).toContain("https://example.com");
     expect(message).toContain("רוצים לקרוא עליה עוד?");
+    expect(message).toContain("יש לכם שאלה, רעיון או פידבק? אפשר פשוט להשיב למייל הזה.");
   });
 });
