@@ -14,8 +14,22 @@ export const metadata: Metadata = {
     description: "מייל יומי בעברית עם ציטוט השראה, סיפור קצר לילדים וקישור לקריאה נוספת.",
     url: "https://www.joinsparkquest.com",
     siteName: "SparkQuest",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "SparkQuest - ציטוט יומי לילדים סקרנים"
+      }
+    ],
     locale: "he_IL",
     type: "website"
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SparkQuest - ציטוט יומי לילדים סקרנים",
+    description: "מייל יומי בעברית עם ציטוט השראה, סיפור קצר לילדים וקישור לקריאה נוספת.",
+    images: ["/opengraph-image"]
   },
   alternates: {
     canonical: "/"
