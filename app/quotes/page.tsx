@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { SiteFooter } from "../footer";
 import { SiteNav } from "../nav";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 type PublishedQuote = {
   sentDate: string;
