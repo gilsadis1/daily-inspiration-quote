@@ -10,7 +10,9 @@
     "dev": "next dev",
     "build:worker": "tsc -p tsconfig.worker.json",
     "start:worker": "node dist/main.js",
+    "start:vision-email": "node dist/oneOffVisionEmail.js",
     "dev:worker": "tsx src/main.ts",
+    "dev:vision-email": "tsx src/oneOffVisionEmail.ts",
     "check-config": "tsx src/checkConfig.ts",
     "test": "vitest run"
   },

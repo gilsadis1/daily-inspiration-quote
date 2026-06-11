@@ -61,6 +61,10 @@ function toHtml(text: string): string {
   ].join("");
 }
 
+function stripBoldMarkers(text: string): string {
+  return text.replace(/\*\*([^*\n]+)\*\*/g, "$1");
+}
+
 function escapeHtml(text: string): string {
   return text
     .replace(/&/g, "&amp;")
@@ -74,10 +78,14 @@ function escapeAttribute(text: string): string {
 
 function linkifyLine(line: string): string {
   const urlPattern = /(https?:\/\/[^\s]+)/g;
-  return escapeHtml(line).replace(urlPattern, (url) => {
+  return renderBold(escapeHtml(line)).replace(urlPattern, (url) => {
     const href = escapeAttribute(url);
     return `<a href="${href}" style="color:#1f6f50;font-weight:700;text-decoration:underline;">${url}</a>`;
   });
+}
+
+function renderBold(line: string): string {
+  return line.replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>");
 }
 
 function senderName(): string {
@@ -123,6 +131,7 @@ async function sendSmtpEmail(
   const to = recipientEmail(options.to);
   const fromName = senderName();
   const replyTo = replyToEmail();
+  const textContent = stripBoldMarkers(text);
 
   const transporter = nodemailer.createTransport({
     host,
@@ -142,7 +151,7 @@ async function sendSmtpEmail(
         to,
         replyTo,
         subject,
-        text,
+        text: textContent,
         html: toHtml(text)
       });
       console.log(`Email queued: ${info.messageId}`);
@@ -171,13 +180,14 @@ async function sendBrevoEmail(
   const to = recipientEmail(options.to);
   const fromName = senderName();
   const replyTo = replyToEmail();
+  const textContent = stripBoldMarkers(text);
 
   const body = {
     sender: { email: from, name: fromName },
     to: [{ email: to }],
     ...(replyTo ? { replyTo: { email: replyTo } } : {}),
     subject,
-    textContent: text,
+    textContent,
     htmlContent: toHtml(text)
   };
 

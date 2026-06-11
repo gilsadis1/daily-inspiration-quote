@@ -209,11 +209,17 @@ export async function unsubscribeByToken(token: string): Promise<boolean> {
 }
 
 export async function listActiveSubscribers(): Promise<Array<{ id: string; email: string; unsubscribeToken: string }>> {
+  return listSubscribersByStatuses(["active"]);
+}
+
+export async function listSubscribersByStatuses(
+  statuses: SubscriberStatus[]
+): Promise<Array<{ id: string; email: string; unsubscribeToken: string }>> {
   const supabase = getSupabaseAdmin();
   const result = await supabase
     .from("subscribers")
     .select("id,email")
-    .eq("status", "active");
+    .in("status", statuses);
 
   if (result.error) {
     throw result.error;
