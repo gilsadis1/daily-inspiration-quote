@@ -461,7 +461,8 @@ button:disabled {
 .mission-hero,
 .mission-content,
 .quotes-hero,
-.quotes-list {
+.quotes-list,
+.quotes-faq {
   width: min(72rem, calc(100% - 2rem));
   max-width: 100%;
   margin: 0 auto;
@@ -635,6 +636,36 @@ blockquote {
   font-weight: 800;
 }
 
+.quotes-faq {
+  padding-top: 2rem;
+}
+
+.quotes-faq h2 {
+  max-width: 18ch;
+  margin-bottom: 1.25rem;
+}
+
+.quotes-faq-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.quotes-faq article {
+  border-top: 3px solid var(--sun);
+  padding-top: 1rem;
+}
+
+.quotes-faq h3 {
+  margin: 0 0 0.65rem;
+  font-size: 1.12rem;
+}
+
+.quotes-faq p {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
 .why-grid p {
   border-top: 3px solid var(--sun);
   padding-top: 1rem;
@@ -719,7 +750,8 @@ blockquote {
 
   .input-row,
   .example-grid,
-  .why-grid {
+  .why-grid,
+  .quotes-faq-grid {
     grid-template-columns: 1fr;
   }
 
